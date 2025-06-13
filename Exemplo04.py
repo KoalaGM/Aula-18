@@ -213,9 +213,12 @@ except Exception as e:
 try: 
 
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+    plt.subplots(2,2, figsize=(18, 6))
 
-    ax.boxplot(array_roubo_veiculo, vert=False, showmeans=True)
+    plt.subplot(2, 2, 1)
+    plt.suptitle('Análise')
+    plt.boxplot(array_roubo_veiculo, vert=False, showmeans=True)
+    plt.title('Boxplot da distribuição')
 
     plt.tight_layout()
     plt.show()
