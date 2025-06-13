@@ -1,9 +1,8 @@
-# import re
-# import unicodedata
-#from utils import limpar_nome_municipio
+# Importa a biblioteca Matplotlib para criar os gráficos
+# pip install matplotlib
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 try:
@@ -16,18 +15,12 @@ try:
     # encodings principais: https://docs.python.org/3/library/codecs.html#standard-encodings
     df_ocorrencias = pd.read_csv(ENDERECO_DADOS, sep=';', encoding='iso-8859-1')
 
-    # chamar a função limpar_nome_municipio para "limpar", acertar os erros 
-    # de acentuação já existentes nos dados do arquivo CSV, obtido remotamente.
-    # A função precisará ser chamada duas vezes
-    #for i in range(2):
-    #    df_ocorrencias['munic'] = df_ocorrencias['munic'].apply(limpar_nome_municipio)
-
     # Demilitando somente as variáveis do Exemplo01: munic e roubo_veiculo
     df_ocorrencias = df_ocorrencias[['munic', 'roubo_veiculo']]
 
     # Totalizar roubo de veiculo por municipio (agrupar e somar)
-    # reset_index(), traz de volta os índeces que numera as colunas, pois eles se perdem
-    # nesta operação
+    # reset_index(), traz de volta os índices que numera as colunas, pois se
+    # perdem nesta operação
     df_roubo_veiculo = df_ocorrencias.groupby('munic').sum(['roubo_veiculo']).reset_index()
 
     # Printando as linhas iniciais com o método head() apenas para ver se os dados
@@ -117,13 +110,18 @@ try:
     # print(f'Q2: {q2}')
     # print(f'Q3: {q3}')
 
-    print("\nMEDIDAS DE DISPERSÃO")
+    # print("\nMedidas de Dispersão: ")
+    # print(30*"-")
+    # medidas de dispersão são estatísticas que medem a variabilidade ou a dispersão
+    # da distribuição.
+    # A amplitude total é a diferença entre o maior e o menor valor de
+    # uma distribuição.
+    # Serve para identificar a variabilidade dos dados. Quanto maior a
+    # amplitude, maior a variabilidade. Quanto mais perto do zero, menor
+    # a variabilidade.
     maximo = np.max(array_roubo_veiculo)
     minimo = np.min(array_roubo_veiculo)
     amplitude_total = maximo - minimo
-
-  
-
 
     # OBTENDO OS MUNÍCIPIOS COM MAIORES E MONORES NÚMEROS DE ROUBOS DE VEÍCULOS
     # Filtramos os registros do DataFrame df_roubo_veiculo para achar os municípios
@@ -161,20 +159,25 @@ try:
     # print(f'Limite inferior: {limite_inferior}')
     # print(f'Limite superior: {limite_superior}')
 
-
-    print("\nMEDIDAS")
-    print(f"Limite Inferior: {limite_inferior}")
-    print(f"Menor valor: {minimo}")
-    print(f'Q1: {q1}')
-    print(f'Q2: {q2}')
-    print(f'Q3: {q3}')
+    # PRINTANDO AS MEDIDAS
+    print('\nPRINTANDO AS MEDIDAS: ')
+    print(30*'-')
+    print(f'Limite Inferior: {limite_inferior}')
+    print(f'Mínimo: {minimo}')
+    print(f'1º Quartil: {q1}')
+    print(f'2º Quartil: {q2}')  # Mediana
+    print(f'3º Quartil: {q3}')
     print(f'IQR: {iqr}')
-    print(f"Maior valor: {maximo}")
-    print(f'Limite superior: {limite_superior}')
-    print(f'Media: {media_roubo_veiculo}')
+    print(f'Máximo: {maximo}')
+    print(f'Limite Superior: {limite_superior}')
+    
+    print('\nOUTRAS AS MEDIDAS: ')
+    print(30*'-')
+    print(f'Amplitude Total: {amplitude_total}')
+    print(f'Média: {media_roubo_veiculo:.3f}')
     print(f'Mediana: {mediana_roubo_veiculo}')
-    print(f'Distancia média/mediana: {distancia}')
-
+    print(f'Distância Média e Mediana: {distancia:.4f}')
+    
 
     # #### OUTLIERS
     # Obtendo os ouliers inferiores
@@ -203,59 +206,17 @@ try:
 
 except Exception as e:
     print(f'Erro ao obter informações sobre padrão de roubo de veículos: {e}')
+    exit()
 
 
-try:
-    fig, ax = plt.subplots(1, 2, figsize=(18, 6))
+# Plotando Gráfico de Barras
+try: 
+    fig, ax = plt.subplots(figsize=(10, 6))
 
-    if not df_roubo_veiculo_outliers_inferiores.empty:
-        dados_inferiores = df_roubo_veiculo_outliers_inferiores.sort_values(by='roubo_veiculo', ascending=True)
+    ax.boxplot(array_roubo_veiculo, vert=False)
 
-        ax[0].barh(dados_inferiores['munic'], dados_inferiores['roubo_veiculo'])
-    else:
-        dados_inferiores = df_roubo_veiculo_menores.sort_values(by='roubo_veiculo', ascending=True).head(10)
-        barras = ax[0].bar(dados_inferiores['munic'], dados_inferiores['roubo_veiculo'], color='black')
-        ax[0].bar_label(barras, label_type='edge', padding=3,fontsize=8)
-        ax[0].tick_params(axis='x', rotation=75, labelsize=8)
-        ax[0].set_title('Menores Roubos')
-        # ax[0].set_xticks([])
-        # ax[0].set_yticks([])
-
-
-    # Verifica se existem outliers superiores
-    if not df_roubo_veiculo_outliers_superiores.empty:
-        # Ordena os dados de forma crescente
-        dados_superiores = df_roubo_veiculo_outliers_superiores.sort_values(by='roubo_veiculo', ascending=True)
-
-        # Cria o gráfico de barras horizontais com os municípios e seus valores
-        ax[1].barh(dados_superiores['munic'], dados_superiores['roubo_veiculo'], color='black')
-        # Define o título e o rótulo do eixo x
-        ax[1].set_title('Outliers Superiores')
-        ax[1].set_xlabel('Total Roubos de Veículos')
-
-        # ###### "VISUAL" #####
-        # Rótulo de dados 0 casas decimais, edge "final da barra", tamanho 8 a 1 padding "distância"
-        barras = ax[1].barh(dados_superiores['munic'], dados_superiores['roubo_veiculo'], color='black')
-        ax[1].bar_label(barras, fmt='%.0f', label_type='edge', fontsize=8, padding=1)  
-        # Tamanho do conteúdo do eixo Vertical "Y"
-        ax[1].tick_params(axis='y', labelsize=8)
-
-    else:
-        # Caso não haja outliers superiores, exibe uma mensagem centralizada
-        ax[1].text(0.5, 0.5, 'Sem outliers superiores', ha='center', va='center', fontsize=12)
-
-        # Define o título do subplot
-        ax[1].set_title('Outliers Superiores')
-
-        # Remove os marcadores dos eixos x e y
-        ax[1].set_xticks([])
-        ax[1].set_yticks([])
-
+    plt.tight_layout()
     plt.show()
-    
 
 except Exception as e:
-    print(f"Error: {e}")
-
-
-exit()
+    print(f'Erro ao plotar: {e}')
